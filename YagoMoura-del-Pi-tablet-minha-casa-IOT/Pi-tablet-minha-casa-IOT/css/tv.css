@@ -1,0 +1,351 @@
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura/altura */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e0e0e0; /* Fundo cinza claro */
+    overflow: hidden; /* Para evitar scroll indesejado no body */
+}
+
+/* Estrutura do Tablet */
+.tablet-frame {
+    width: 90%; /* Ajuste para caber em telas maiores também */
+    max-width: 960px; /* Tamanho máximo de um tablet grande */
+    aspect-ratio: 16 / 10; /* Proporção de tela comum para tablets (landscape) */
+    background-color: #ffffff; /* Borda branca do tablet */
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.1);
+    padding: 20px; /* Borda interna */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tablet-screen {
+    width: 100%;
+    height: 100%;
+    background-color: #000000; /* Cor de fundo da tela (preto) */
+    border-radius: 15px;
+    overflow: hidden; /* Conteúdo não deve vazar */
+    display: flex;
+    flex-direction: column; /* Para que o header e o conteúdo da TV fiquem em coluna */
+}
+
+/* Cabeçalho do Tablet Principal (parte superior da moldura) */
+.tablet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #4e4d4d; /* Cinza escuro */
+    border-bottom: 1px solid #000000;
+    color: #ffffff; /* Texto branco */
+    font-size: 0.9em;
+    flex-shrink: 0; /* Impede que o cabeçalho encolha */
+}
+
+.tablet-header .header-left,
+.tablet-header .header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.tablet-header .header-center {
+    font-weight: bold;
+    color: #ffffff; /* Texto branco */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.tablet-header .header-center .fas {
+    color: #ffffff; /* Ícone branco */
+}
+
+/* Estilos para o Conteúdo do Controle da TV */
+.tv-control-content {
+    flex-grow: 1; /* Faz o conteúdo da TV ocupar o espaço restante na tela do tablet */
+    display: flex;
+    flex-direction: column;
+    background-color: #f0f2f5; /* Cor de fundo suave para o controle da TV */
+    color: #333;
+    overflow-y: auto; /* Permite scroll se o conteúdo da TV for muito grande */
+}
+
+/* Cabeçalho específico do Controle da TV */
+.tv-header {
+    background-color: #00BCD4; /* Ciano vibrante para o cabeçalho da TV */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Impede que o cabeçalho da TV encolha */
+}
+
+.tv-header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tv-header .back-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.tv-header .back-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Área principal dos controles da TV */
+.tv-main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    background-color: #f0f2f5; /* Fundo do conteúdo da TV */
+}
+
+.tv-control-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    text-align: center;
+    width: 100%;
+    max-width: 500px; /* Limita a largura do card de controle */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tv-control-card h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.tv-control-card .icon-large {
+    font-size: 4em;
+    color: #00BCD4; /* Ciano para o ícone da TV */
+    margin-bottom: 20px;
+}
+
+/* Controles de Volume */
+.volume-section, .channel-section {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.volume-section label, .channel-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #555;
+    text-align: left;
+}
+
+.volume-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.volume-slider-container i {
+    font-size: 1.5em;
+    color: #666;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+    -webkit-appearance: none; /* Remove o estilo padrão do navegador */
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.9;
+    transition: opacity .2s;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #00BCD4;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+/* Controles de Canal */
+.channel-control-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.channel-control-buttons button {
+    background-color: #007bff; /* Azul padrão */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.channel-control-buttons button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.channel-control-buttons button:active {
+    transform: translateY(0);
+}
+
+#currentChannel {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #00BCD4; /* Ciano */
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Botão de Ligar/Desligar */
+.power-button-container {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.power-button {
+    background-color: #dc3545; /* Vermelho para desligar */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%;
+    max-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.power-button.on {
+    background-color: #28a745; /* Verde para ligar */
+}
+
+.power-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.power-button:active {
+    transform: translateY(0);
+}
+
+/* Estado da TV (Ligada/Desligada) */
+.tv-status {
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #555;
+}
+.tv-status.on {
+    color: #28a745; /* Verde */
+}
+.tv-status.off {
+    color: #dc3545; /* Vermelho */
+}
+
+/* Estilos para elementos desabilitados */
+input[type="range"]:disabled,
+.channel-control-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+input[type="range"]:disabled::-webkit-slider-thumb {
+    background: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* Responsividade para telas menores (smartphones) */
+@media (max-width: 767px) {
+    .tablet-frame {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        aspect-ratio: auto; /* Remove a proporção fixa para telas de celular */
+    }
+
+    .tablet-screen {
+        border-radius: 0;
+    }
+
+    .tv-main-content {
+        padding: 15px;
+        gap: 15px;
+    }
+    .tv-control-card {
+        padding: 15px;
+    }
+    .tv-control-card h2 {
+        font-size: 1.5em;
+    }
+    .icon-large {
+        font-size: 3.5em;
+    }
+    .channel-control-buttons button {
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+    #currentChannel {
+        font-size: 1.5em;
+    }
+}

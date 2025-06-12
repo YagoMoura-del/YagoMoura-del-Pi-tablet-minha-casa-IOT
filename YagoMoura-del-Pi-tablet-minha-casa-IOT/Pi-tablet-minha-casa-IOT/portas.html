@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Controle de Porta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Estilos globais e de layout do tablet-frame (adaptados) */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            display: flex; /* Para centralizar o tablet-frame */
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; /* Evita scroll indesejado */
+        }
+
+        .tablet-frame {
+            width: 100%;
+            max-width: 800px; /* Largura máxima típica para um tablet */
+            height: 100%;
+            max-height: 1024px; /* Altura máxima típica para um tablet */
+            border: 16px solid #333;
+            border-radius: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #000; /* Borda do tablet */
+        }
+
+        .tablet-screen {
+            background-color: #c2c2c2;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
+            border-radius: 14px; /* Raio menor para a tela interna */
+        }
+
+        /* Estilos do cabeçalho */
+        .tablet-header {
+            display: flex;
+            justify-content: space-between; /* Espaço entre os blocos */
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #46c1fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-left {
+            flex: 1; /* Permite que o botão de voltar ocupe espaço */
+            text-align: left;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #007bff;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0; /* Remove padding padrão de botão */
+        }
+
+        .back-button i {
+            margin-right: 5px;
+        }
+
+        .header-center {
+            flex: 1; /* Permite que este bloco ocupe espaço */
+            display: flex; /* Transforma em um container flexbox */
+            align-items: center; /* Alinha verticalmente os itens dentro dele */
+            justify-content: center; /* CENTRALIZA HORIZONTALMENTE o conteúdo (ícones e h1) */
+            gap: 15px; /* Espaçamento entre os itens (ícones e h1) */
+            white-space: nowrap; /* Evita que o texto quebre em várias linhas */
+        }
+
+        .header-center i { /* Estiliza os ícones dentro do header-center */
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .header-center h1 {
+            margin: 0; /* Remove margem padrão do h1 */
+            font-size: 1.2em; /* Ajuste o tamanho do título do cabeçalho */
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-center h1 i {
+            margin-right: 8px; /* Espaçamento entre o ícone e o texto do título */
+            color: #007bff; /* Cor do ícone do título */
+        }
+
+        /* O header-right não é mais necessário, pois os ícones estão no center */
+        /* .header-right { flex: 1; text-align: right; } */
+
+        /* Estilos do conteúdo principal */
+        .tablet-main-content {
+            flex-grow: 1;
+            padding: 20px; /* Adicione padding ao conteúdo principal */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Alinha o conteúdo ao topo */
+        }
+
+        .portas-section {
+            width: 100%;
+            max-width: 400px; /* Limita a largura da seção para melhor visualização do card único */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .portas-section h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portas-section h1 i {
+            margin-right: 10px;
+            color: #13838b; /* Cor marrom para o ícone de casa */
+        }
+
+        .portas-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Apenas uma coluna para a única porta */
+            gap: 20px;
+            width: 100%; 
+            /* max-width: 300px; */ /* Removido para o card ocupar a largura total do .portas-section */
+            justify-content: center; 
+        }
+
+        .porta-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px; /* Aumenta um pouco o padding para o card único */
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); 
+        }
+
+        .porta-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+        }
+
+        .porta-card h2 {
+            margin-top: 0;
+            color: #555;
+            font-size: 1.4em; /* Aumenta o tamanho do título da porta */
+            margin-bottom: 15px;
+        }
+
+        .porta-card i.door-icon { 
+            font-size: 4em; /* Ícone maior para a porta */
+            margin-bottom: 20px;
+            color: #8B4513; 
+            transition: color 0.3s ease;
+        }
+        .porta-card i.door-icon.aberta {
+            color: #d9534f; 
+        }
+        .porta-card i.door-icon.fechada {
+            color: #5cb85c; 
+        }
+
+        .status {
+            font-weight: bold;
+            font-size: 1.2em; /* Aumenta o tamanho do status */
+            margin-bottom: 20px;
+        }
+
+        .status.aberta {
+            color: #d9534f; 
+        }
+
+        .status.fechada {
+            color: #5cb85c; 
+        }
+
+        .actions button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px; /* Aumenta o padding do botão */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em; /* Aumenta o tamanho do texto do botão */
+            margin: 5px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            width: 100%; /* Botão ocupa a largura total do card */
+            max-width: 250px; /* Limita a largura máxima do botão */
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .actions button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none; 
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .tablet-main-content {
+                padding: 15px;
+            }
+            .portas-section h1 {
+                font-size: 1.8em;
+                margin-bottom: 25px;
+            }
+            .porta-card {
+                padding: 18px;
+            }
+            .porta-card h2 {
+                font-size: 1.3em;
+            }
+            .porta-card i.door-icon {
+                font-size: 3.5em;
+            }
+            .status {
+                font-size: 1.1em;
+            }
+            .actions button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-header {
+                padding: 10px 15px;
+            }
+            .header-center h1 {
+                font-size: 1.1em;
+            }
+            .header-center i {
+                font-size: 1.1em;
+            }
+            .portas-section h1 {
+                font-size: 1.6em;
+                margin-bottom: 20px;
+            }
+            .porta-card {
+                padding: 15px;
+            }
+            .porta-card i.door-icon {
+                font-size: 3em; 
+            }
+            .status {
+                font-size: 1em;
+            }
+            .actions button {
+                padding: 9px 18px;
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-frame {
+                border-radius: 20px;
+                border-width: 10px;
+            }
+            .tablet-screen {
+                border-radius: 8px;
+            }
+            .tablet-main-content {
+                padding: 10px;
+            }
+            .portas-section h1 {
+                font-size: 1.4em;
+                margin-bottom: 15px;
+            }
+            .porta-card {
+                padding: 12px;
+            }
+            .porta-card h2 {
+                font-size: 1.1em;
+            }
+            .porta-card i.door-icon {
+                font-size: 2.5em;
+            }
+            .status {
+                font-size: 0.9em;
+            }
+            .actions button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+            .header-center h1 {
+                font-size: 1em;
+                gap: 10px;
+            }
+            .header-center i {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                    <h1><i class="fas fa-door-open"></i> Porta de Entrada</h1>
+                </div>
+                </header>
+
+            <main class="tablet-main-content">
+                <section class="portas-section">
+                    <h1><i class="fas fa-house-damage"></i> Monitoramento da Porta de Entrada</h1>
+                    <div class="portas-grid" id="portasContainer">
+                        </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Simulação do estado da porta (em uma aplicação real, isso viria de um backend)
+        const portaEntrada = { id: 'portaEntrada', nome: 'Porta de Entrada', estado: 'fechada' };
+
+        const portasContainer = document.getElementById('portasContainer');
+
+        function renderizarPorta() {
+            portasContainer.innerHTML = ''; // Limpa o conteúdo existente
+            const portaCard = document.createElement('div');
+            portaCard.classList.add('porta-card');
+
+            // Determina a classe de status e o ícone com base no estado da porta
+            const statusClass = portaEntrada.estado === 'aberta' ? 'aberta' : 'fechada';
+            const iconClass = portaEntrada.estado === 'aberta' ? 'fa-door-open' : 'fa-door-closed'; 
+
+            portaCard.innerHTML = `
+                <h2>${portaEntrada.nome}</h2>
+                <i class="fas ${iconClass} door-icon ${statusClass}" id="${portaEntrada.id}Icon"></i>
+                <p class="status ${statusClass}" id="${portaEntrada.id}Status">Estado: ${portaEntrada.estado.toUpperCase()}</p>
+                <div class="actions">
+                    <button onclick="togglePorta('${portaEntrada.id}')">
+                        ${portaEntrada.estado === 'aberta' ? 'Fechar' : 'Abrir'} Porta
+                    </button>
+                </div>
+            `;
+            portasContainer.appendChild(portaCard);
+        }
+
+        function togglePorta(idPorta) {
+            // Verifica se é a porta de entrada que está sendo alternada
+            if (idPorta === 'portaEntrada') {
+                portaEntrada.estado = portaEntrada.estado === 'aberta' ? 'fechada' : 'aberta';
+                renderizarPorta(); // Renderiza novamente para refletir a mudança
+                console.log(`Porta ${portaEntrada.nome} está: ${portaEntrada.estado.toUpperCase()}`);
+            }
+        }
+
+        // Renderiza a porta quando a página carrega
+        document.addEventListener('DOMContentLoaded', renderizarPorta);
+    </script>
+</body>
+</html>

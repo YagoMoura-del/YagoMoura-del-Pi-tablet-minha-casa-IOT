@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Fechaduras Eletrônicas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="./css/style.css"> 
+    
+    <style>
+        /* Estilos específicos para esta página de fechaduras */
+        body {
+            /* Remover ou ajustar estilos de body que já estão no style.css do tablet-frame */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            /* Flexbox será gerenciado pelo tablet-frame/screen */
+            display: flex; /* Mantido para que o tablet-frame centralize, se necessário */
+            justify-content: center; /* Centraliza o tablet-frame */
+            align-items: center; /* Centraliza verticalmente o tablet-frame */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            overflow: hidden; /* Evita scroll indesejado do body se o tablet-frame for maior */
+        }
+
+        /* Remova o header original e confie no .tablet-header do style.css */
+        
+        /* Conteúdo Principal */
+        .tablet-main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 20px;
+            display: flex; /* Adicionado display flex para tablet-main-content */
+            flex-direction: column; /* Organiza em coluna */
+            align-items: center; /* Centraliza o conteúdo (incluindo o lock-grid-container) */
+            gap: 20px; /* Espaçamento entre o h2 e o grid, se houver */
+        }
+
+        .tablet-main-content .lock-grid-container { /* Novo contêiner para a grid de fechaduras */
+            width: 100%; /* Garante que o grid ocupe a largura total disponível */
+            max-width: 600px; /* Limita a largura máxima para centralização em telas grandes */
+            display: grid;
+            gap: 25px; /* Espaçamento entre os cards */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Layout responsivo em grid */
+            justify-items: center; /* Centraliza os itens dentro de cada célula da grid */
+            align-items: flex-start; /* Alinha os itens ao topo */
+            margin: 0 auto; /* Centraliza o grid container na página */
+        }
+
+        /* Card de Fechadura Individual */
+        .lock-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centraliza o conteúdo do card horizontalmente */
+            justify-content: center; /* Centraliza o conteúdo do card verticalmente */
+            width: 100%; /* Permite que o card ocupe a largura total da sua coluna na grid */
+            max-width: 300px; /* Limita a largura do card para melhor apresentação */
+        }
+
+        .lock-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centraliza o título e o ícone do h2 */
+            gap: 10px;
+        }
+
+        .lock-icon {
+            font-size: 4.5em; /* Tamanho grande para o ícone */
+            margin-bottom: 20px;
+            color: #ccc; /* Cor padrão */
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .lock-icon.locked {
+            color: #dc3545; /* Vermelho para trancada */
+            transform: rotate(0deg);
+        }
+
+        .lock-icon.unlocked {
+            color: #28a745; /* Verde para destrancada */
+            transform: rotate(15deg); /* Leve rotação para indicar abertura */
+        }
+
+        .lock-controls {
+            display: flex; /* Para alinhar os botões lado a lado */
+            justify-content: center; /* Centraliza os botões */
+            gap: 10px; /* Espaço entre os botões */
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
+        }
+
+        .lock-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-width: 120px; /* Garante largura mínima para botões */
+        }
+
+        .lock-controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .lock-controls button:active {
+            transform: translateY(0);
+        }
+
+        .lock-controls button.unlock-button {
+            background-color: #28a745; /* Verde para destrancar */
+        }
+        .lock-controls button.unlock-button:hover {
+            background-color: #218838;
+        }
+
+        .lock-controls button.lock-button {
+            background-color: #dc3545; /* Vermelho para trancar */
+        }
+        .lock-controls button.lock-button:hover {
+            background-color: #c82333;
+        }
+
+        .status-indicator {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background-color: #ccc;
+            color: #555;
+            min-width: 150px; /* Garante largura mínima */
+        }
+        .status-indicator.locked {
+            background-color: #dc3545; /* Vermelho forte para trancado */
+            color: white;
+        }
+        .status-indicator.unlocked {
+            background-color: #28a745; /* Verde para destrancado */
+            color: white;
+        }
+
+        /* Responsividade para o contexto do tablet */
+        @media (max-width: 992px) {
+            .tablet-main-content .lock-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                max-width: 550px; /* Ajusta max-width do container para telas menores */
+            }
+            .lock-card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-main-content .lock-grid-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas menores para melhor visualização */
+                gap: 15px;
+                max-width: 350px; /* Ajusta max-width para uma coluna */
+            }
+            .lock-card h2 {
+                font-size: 1.3em;
+            }
+            .lock-icon {
+                font-size: 4em;
+            }
+            .lock-controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+                min-width: 100px;
+            }
+            .status-indicator {
+                font-size: 1em;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-main-content .lock-grid-container {
+                padding: 10px;
+                max-width: 90%; /* Ocupa mais espaço em telas muito pequenas */
+            }
+            .lock-card {
+                padding: 10px;
+            }
+            .lock-card h2 {
+                font-size: 1.2em;
+            }
+            .lock-icon {
+                font-size: 3.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-lock"></i> Fechaduras Eletrônicas</h1>
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="lock-grid-container"> 
+                    <div class="lock-card" id="lock-principal">
+                        <h2><i class="fas fa-door-closed"></i> Fechadura Principal</h2>
+                        <i class="fas fa-lock lock-icon" id="icon-principal"></i>
+                        <div class="lock-controls">
+                            <button class="unlock-button" onclick="toggleLock('principal', true)"><i class="fas fa-lock-open"></i> Destrancar</button>
+                            <button class="lock-button" onclick="toggleLock('principal', false)"><i class="fas fa-lock"></i> Trancar</button>
+                        </div>
+                        <div class="status-indicator" id="status-principal"></div>
+                    </div>
+
+                    <div class="lock-card" id="lock-portao">
+                        <h2><i class="fas fa-warehouse"></i> Portão da Garagem</h2>
+                        <i class="fas fa-lock lock-icon" id="icon-portao"></i>
+                        <div class="lock-controls">
+                            <button class="unlock-button" onclick="toggleLock('portao', true)"><i class="fas fa-lock-open"></i> Destrancar</button>
+                            <button class="lock-button" onclick="toggleLock('portao', false)"><i class="fas fa-lock"></i> Trancar</button>
+                        </div>
+                        <div class="status-indicator" id="status-portao"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para simular o estado das fechaduras (true = destrancada, false = trancada)
+        const lockStates = {
+            'principal': { unlocked: false }, // Começa trancada
+            'portao': { unlocked: false }    // Começa trancada
+        };
+
+        // Função para atualizar o status visual da fechadura
+        function updateLockStatus(lockName) {
+            const iconElement = document.getElementById(`icon-${lockName}`);
+            const statusElement = document.getElementById(`status-${lockName}`);
+            const state = lockStates[lockName];
+
+            iconElement.classList.remove('locked', 'unlocked');
+            statusElement.classList.remove('locked', 'unlocked');
+
+            if (state.unlocked) {
+                iconElement.classList.add('unlocked');
+                statusElement.textContent = 'DESTRANCADA';
+                statusElement.classList.add('unlocked');
+            } else {
+                iconElement.classList.add('locked');
+                statusElement.textContent = 'TRANCADA';
+                statusElement.classList.add('locked');
+            }
+        }
+
+        // Função para trancar/destrancar a fechadura
+        function toggleLock(lockName, unlock) {
+            lockStates[lockName].unlocked = unlock;
+            updateLockStatus(lockName);
+            console.log(`Fechadura ${lockName} está: ${lockStates[lockName].unlocked ? 'Destrancada' : 'Trancada'}`);
+            // Em um sistema real, aqui você enviaria o comando para a fechadura real.
+            // Poderia também notificar seu MainController.js sobre a mudança.
+        }
+
+        // Inicializa o status das fechaduras ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const lock in lockStates) {
+                updateLockStatus(lock);
+            }
+        });
+    </script>
+</body>
+</html>

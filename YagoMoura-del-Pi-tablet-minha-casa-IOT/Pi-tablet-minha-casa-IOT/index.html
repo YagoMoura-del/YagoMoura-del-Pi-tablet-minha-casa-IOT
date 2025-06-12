@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home Tablet</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <span id="current-time"></span>
+                </div>
+                <div class="header-center">
+                    <i class="fas fa-home"></i> Smart Home
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <section class="dashboard-section">
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                    <div class="device-status-grid">
+                        <div class="status-card" id="card-temperatura">
+                            <i class="fas fa-thermometer-half"></i>
+                            <h3>Temperatura</h3>
+                            <a href="temperatura.html">
+                            <p><span id="temp-display">24.5</span>°C</p>
+                            </a>
+                        </div>
+                        <div class="status-card" id="card-luzes">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Luzes</h3>
+                            <a href="luzes.html">
+                            <p><span id="lights-on-count"></span> luzes</p>
+                            </a>
+                        </div>
+                        <div class="status-card" id="card-seguranca">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Segurança</h3>
+                            <a href="seguranca.html">
+                            <p><span id="security-status">Desativado</span></p>
+                            </a>
+                        </div>
+                        <div class="status-card" id="card-portas">
+                            <i class="fas fa-door-closed"></i>
+                            <h3>Portas</h3>
+                            <a href="portas.html">
+                            <p><span id="doors-status">Todas Trancadas</span></p>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="device-control-section">
+                    <h2><i class="fas fa-cogs"></i> Controle de Dispositivos</h2>
+                    <div class="device-category-grid">
+                        <div class="category-card" data-category="cameras">
+                            <i class="fas fa-video"></i>
+                            <h3>Câmeras</h3>
+                            <a href="cameras.html">
+                            <button>Gerenciar Câmeras</button>
+                            </a>
+                        </div>
+                        <div class="category-card" data-category="presence">
+                            <i class="fas fa-walking"></i>
+                            <h3>Sensores Presença</h3>
+                            <a href="presenca.html">
+                            <button>Gerenciar Sensores</button>
+                            </a>
+                        </div>
+                        <div class="category-card" data-category="lock">
+                            <i class="fas fa-lock"></i>
+                            <h3>Fechadura</h3>
+                            <a href="lock.html">
+                            <button>Gerenciar Fechaduras</button>
+                            </a>
+                        </div>
+                        <div class="category-card" data-category="tv">
+                            <i class="fas fa-tv"></i>
+                            <h3>Smart TV</h3>
+                            <a href="tv.html">
+                            <button>Gerenciar Smart TV</button>
+                            </a>
+                        </div>
+                        <div class="category-card" data-category="voice-assistant">
+                            <i class="fas fa-microphone-alt"></i>
+                            <h3>Assistente Voz</h3>
+                            <a href="voz.html">
+                            <button>Abrir Assistente</button>
+                            </a>
+                        </div>
+                        <div class="category-card" data-category="temperature">
+                            <i class="fas fa-thermometer-half"></i>
+                            <h3>Temperatura</h3>
+                            <a href="temperatura.html">
+                                <button>Ver Sensores</button>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="log-section">
+                    <h2><i class="fas fa-history"></i> Log de Eventos</h2>
+                    <ul id="event-log">
+                    </ul>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+
+        // Atualiza o horário a cada segundo
+        setInterval(updateCurrentTime, 1000);
+
+        // Chama a função uma vez para exibir o horário imediatamente ao carregar a página
+        updateCurrentTime();
+    </script>
+
+    <script src="src/app.js"></script>
+    <script src="src/models/device.js"></script>
+    <script src="src/models/light.js"></script>
+    <script src="src/models/camera.js"></script>
+    <script src="src/models/presenceSensor.js"></script>
+    <script src="src/models/electronicLock.js"></script>
+    <script src="src/models/smartTv.js"></script>
+    <script src="src/models/temperatureSensor.js"></script>
+    <script src="src/controllers/mainController.js"></script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Câmeras de Segurança</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="./css/style.css"> 
+    
+    <style>
+        /* Estilos específicos para esta página de câmeras */
+        body {
+            /* Remover estilos de body que já estão no style.css do tablet-frame */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            /* Flexbox será gerenciado pelo tablet-frame/screen */
+            display: flex; /* Mantido para que o tablet-frame centralize, se necessário */
+            justify-content: center; /* Centraliza o tablet-frame */
+            align-items: center; /* Centraliza verticalmente o tablet-frame */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            overflow: hidden; /* Evita scroll indesejado do body se o tablet-frame for maior */
+        }
+
+        /* Remova ou ajuste estilos que podem conflitar com tablet-frame/screen */
+        /* Exemplo: header que você já tem no index.html deve ser usado aqui também */
+
+        /* Conteúdo Principal (dentro do tablet-screen) */
+        .tablet-main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 20px;
+            display: flex; /* Adicionado display flex */
+            flex-direction: column; /* Organiza em coluna */
+            align-items: center; /* Centraliza o conteúdo (incluindo o camera-grid-container) */
+            gap: 20px; /* Espaçamento entre o h2 e o grid, se houver */
+            overflow-y: auto; /* Adicionado para permitir scroll se houver muitas câmeras */
+        }
+
+        .tablet-main-content .camera-grid-container {
+            width: 100%; /* Garante que o grid ocupe a largura total disponível */
+            max-width: 900px; /* Limita a largura máxima para centralização em telas grandes */
+            display: grid;
+            gap: 25px; /* Espaçamento entre os cards */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo em grid */
+            justify-items: center; /* Centraliza os itens dentro de cada célula da grid */
+            align-items: flex-start; /* Alinha os itens ao topo */
+            margin: 0 auto; /* Centraliza o grid container na página */
+        }
+
+        /* Estilos Gerais para o Corpo da Página */
+        /* Estilos Gerais do Corpo (apenas para fallback, se o tablet-frame não carregar) */
+        /* body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; 
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        } */
+
+        /* Cabeçalho da Página (ajustado para o novo layout de tablet) */
+        /* O cabeçalho agora será o tablet-header do style.css */
+        
+        /* Ajustes para o cabeçalho dentro do tablet-screen */
+        .tablet-header {
+            background-color: #007bff; /* Azul vibrante */
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky; /* Garante que o cabeçalho fixe ao rolar */
+            top: 0;
+            z-index: 100;
+        }
+
+        .tablet-header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Estilo para o botão "Voltar" dentro do cabeçalho do tablet */
+        .tablet-header .back-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+        }
+
+        .tablet-header .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Card de Câmera Individual */
+        .camera-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            padding-bottom: 15px; /* Espaçamento no final do card */
+            width: 100%; /* Permite que o card ocupe a largura total da sua coluna na grid */
+            max-width: 350px; /* Limita a largura do card para melhor apresentação */
+        }
+
+        .camera-card h2 {
+            background-color: #4CAF50; /* Verde para o título do card */
+            color: white;
+            margin: 0;
+            padding: 12px 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .camera-feed {
+            width: 100%;
+            padding-top: 56.25%; /* Proporção 16:9 para simular vídeo */
+            background-color: #222; /* Fundo preto para o "vídeo" */
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .camera-feed .placeholder-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            color: #888;
+        }
+
+        .camera-feed.active .placeholder-icon {
+            color: #00ff00; /* Verde claro quando ativo */
+            animation: pulse 1.5s infinite alternate; /* Animação de pulso */
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+            gap: 10px; /* Espaço entre os botões */
+        }
+
+        .camera-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-width: 130px; /* Garante largura mínima para botões */
+        }
+
+        .camera-controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .camera-controls button:active {
+            transform: translateY(0);
+        }
+
+        .camera-controls button.red {
+            background-color: #dc3545; /* Vermelho para gravar/parar */
+        }
+        .camera-controls button.red:hover {
+            background-color: #c82333;
+        }
+
+        .status-indicator {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        .status-indicator.recording {
+            color: #dc3545; /* Vermelho para gravando */
+        }
+        .status-indicator.streaming {
+            color: #28a745; /* Verde para streaming */
+        }
+
+        /* Responsividade - Ajuste para se encaixar melhor na tela do tablet */
+        @media (max-width: 992px) {
+            .tablet-main-content .camera-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+                max-width: 800px;
+            }
+            .camera-card {
+                padding-bottom: 10px;
+                max-width: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-main-content .camera-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 15px;
+                max-width: 550px; /* Ajusta max-width para telas menores */
+            }
+            .camera-card {
+                max-width: 280px;
+            }
+            .camera-card h2 {
+                font-size: 1.3em;
+            }
+            .camera-feed .placeholder-icon {
+                font-size: 3.5em;
+            }
+            .camera-controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+                min-width: 110px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-main-content {
+                padding: 10px;
+            }
+            .tablet-main-content .camera-grid-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas muito pequenas */
+                gap: 15px;
+                max-width: 90%; /* Ocupa mais espaço em telas muito pequenas */
+            }
+            .camera-card {
+                padding-bottom: 10px;
+                max-width: 100%; /* Ocupa a largura total da coluna */
+            }
+            .camera-card h2 {
+                font-size: 1.2em;
+            }
+            .camera-feed .placeholder-icon {
+                font-size: 3em;
+            }
+            .camera-controls button {
+                padding: 7px 12px;
+                font-size: 0.8em;
+                min-width: unset; /* Remove min-width para telas muito pequenas */
+                flex-basis: 48%; /* Permite que dois botões se encaixem lado a lado */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-video"></i> Câmeras de Segurança</h1>
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="camera-grid-container"> 
+                    <div class="camera-card" id="camera-entrada">
+                        <h2><i class="fas fa-door-open"></i> Câmera da Entrada</h2>
+                        <div class="camera-feed" id="feed-entrada">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('entrada')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('entrada')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-entrada">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-quintal">
+                        <h2><i class="fas fa-tree"></i> Câmera do Quintal</h2>
+                        <div class="camera-feed" id="feed-quintal">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('quintal')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('quintal')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-quintal">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-banheiro1">
+                        <h2><i class="fas fa-toilet"></i> Câmera Banheiro 1</h2>
+                        <div class="camera-feed" id="feed-banheiro1">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('banheiro1')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('banheiro1')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-banheiro1">Inativa</div>
+                    </div>
+                    <div class="camera-card" id="camera-banheiro2">
+                        <h2><i class="fas fa-toilet"></i> Câmera Banheiro 2</h2>
+                        <div class="camera-feed" id="feed-banheiro2">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('banheiro2')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('banheiro2')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-banheiro2">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-closet1">
+                        <h2><i class="fas fa-door-closed"></i> Câmera Closet 1</h2>
+                        <div class="camera-feed" id="feed-closet1">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('closet1')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('closet1')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-closet1">Inativa</div>
+                    </div>
+                    <div class="camera-card" id="camera-closet2">
+                        <h2><i class="fas fa-door-closed"></i> Câmera Closet 2</h2>
+                        <div class="camera-feed" id="feed-closet2">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('closet2')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('closet2')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-closet2">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-dormitorio1">
+                        <h2><i class="fas fa-bed"></i> Câmera Dormitório 1</h2>
+                        <div class="camera-feed" id="feed-dormitorio1">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('dormitorio1')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('dormitorio1')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-dormitorio1">Inativa</div>
+                    </div>
+                    <div class="camera-card" id="camera-dormitorio2">
+                        <h2><i class="fas fa-bed"></i> Câmera Dormitório 2</h2>
+                        <div class="camera-feed" id="feed-dormitorio2">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('dormitorio2')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('dormitorio2')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-dormitorio2">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-salajantar">
+                        <h2><i class="fas fa-utensils"></i> Câmera Sala Jantar</h2>
+                        <div class="camera-feed" id="feed-salajantar">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('salajantar')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('salajantar')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-salajantar">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-salaestar">
+                        <h2><i class="fas fa-couch"></i> Câmera Sala Estar</h2>
+                        <div class="camera-feed" id="feed-salaestar">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('salaestar')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('salaestar')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-salaestar">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-cozinha">
+                        <h2><i class="fas fa-kitchen-set"></i> Câmera Cozinha</h2>
+                        <div class="camera-feed" id="feed-cozinha">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('cozinha')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('cozinha')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-cozinha">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-escritorio">
+                        <h2><i class="fas fa-briefcase"></i> Câmera Escritório</h2>
+                        <div class="camera-feed" id="feed-escritorio">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('escritorio')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('escritorio')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-escritorio">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-biblioteca">
+                        <h2><i class="fas fa-book"></i> Câmera Biblioteca</h2>
+                        <div class="camera-feed" id="feed-biblioteca">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('biblioteca')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('biblioteca')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-biblioteca">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-piscina">
+                        <h2><i class="fas fa-water-ladder"></i> Câmera Piscina</h2>
+                        <div class="camera-feed" id="feed-piscina">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('piscina')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('piscina')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-piscina">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-garagem">
+                        <h2><i class="fas fa-car"></i> Câmera Garagem</h2>
+                        <div class="camera-feed" id="feed-garagem">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('garagem')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('garagem')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-garagem">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-dispensa">
+                        <h2><i class="fas fa-boxes"></i> Câmera Despensa</h2>
+                        <div class="camera-feed" id="feed-dispensa">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('dispensa')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('dispensa')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-dispensa">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-deposito">
+                        <h2><i class="fas fa-box-archive"></i> Câmera Depósito</h2>
+                        <div class="camera-feed" id="feed-deposito">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('deposito')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('deposito')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-deposito">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-academia">
+                        <h2><i class="fas fa-dumbbell"></i> Câmera Academia</h2>
+                        <div class="camera-feed" id="feed-academia">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('academia')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('academia')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-academia">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-salatoca">
+                        <h2><i class="fas fa-music"></i> Câmera Sala Música</h2>
+                        <div class="camera-feed" id="feed-salatoca">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('salatoca')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('salatoca')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-salatoca">Inativa</div>
+                    </div>
+
+                    <div class="camera-card" id="camera-suitemaster">
+                        <h2><i class="fas fa-bed"></i> Câmera Suíte Master</h2>
+                        <div class="camera-feed" id="feed-suitemaster">
+                            <i class="fas fa-camera-retro placeholder-icon"></i>
+                        </div>
+                        <div class="camera-controls">
+                            <button onclick="toggleCameraFeed('suitemaster')"><i class="fas fa-eye"></i> Ver Ao Vivo</button>
+                            <button class="red" onclick="toggleRecording('suitemaster')"><i class="fas fa-circle"></i> Gravar/Parar</button>
+                        </div>
+                        <div class="status-indicator" id="status-suitemaster">Inativa</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para simular o estado das câmeras
+        const cameraStates = {
+            'entrada': { streaming: false, recording: false },
+            'quintal': { streaming: false, recording: false },
+            'banheiro1': { streaming: false, recording: false },
+            'banheiro2': { streaming: false, recording: false },
+            'closet1': { streaming: false, recording: false },
+            'closet2': { streaming: false, recording: false },
+            'dormitorio1': { streaming: false, recording: false },
+            'dormitorio2': { streaming: false, recording: false },
+            'salajantar': { streaming: false, recording: false },
+            'salaestar': { streaming: false, recording: false },
+            'cozinha': { streaming: false, recording: false },
+            'escritorio': { streaming: false, recording: false },
+            'biblioteca': { streaming: false, recording: false },
+            'piscina': { streaming: false, recording: false },
+            'garagem': { streaming: false, recording: false },
+            'dispensa': { streaming: false, recording: false },
+            'deposito': { streaming: false, recording: false },
+            'academia': { streaming: false, recording: false },
+            'salatoca': { streaming: false, recording: false },
+            'suitemaster': { streaming: false, recording: false }
+        };
+
+        // Função para atualizar o status visual da câmera
+        function updateCameraStatus(cameraName) {
+            const feedElement = document.getElementById(`feed-${cameraName}`);
+            const statusElement = document.getElementById(`status-${cameraName}`);
+            const state = cameraStates[cameraName];
+
+            feedElement.classList.remove('active');
+            statusElement.className = 'status-indicator'; // Reseta classes
+
+            if (state.recording) {
+                feedElement.classList.add('active');
+                statusElement.textContent = 'Gravando...';
+                statusElement.classList.add('recording');
+            } else if (state.streaming) {
+                feedElement.classList.add('active');
+                statusElement.textContent = 'Ao Vivo...';
+                statusElement.classList.add('streaming');
+            } else {
+                statusElement.textContent = 'Inativa';
+            }
+        }
+
+        // Função para Ligar/Desligar o Feed Ao Vivo
+        function toggleCameraFeed(cameraName) {
+            cameraStates[cameraName].streaming = !cameraStates[cameraName].streaming;
+            // Se iniciar streaming, para gravação (um ou outro)
+            if (cameraStates[cameraName].streaming && cameraStates[cameraName].recording) {
+                cameraStates[cameraName].recording = false;
+            }
+            updateCameraStatus(cameraName);
+            console.log(`Câmera ${cameraName} - Ao Vivo: ${cameraStates[cameraName].streaming}`);
+            // Aqui, em um sistema real, você iniciaria/pararia o streaming de vídeo.
+        }
+
+        // Função para Iniciar/Parar Gravação
+        function toggleRecording(cameraName) {
+            cameraStates[cameraName].recording = !cameraStates[cameraName].recording;
+            // Se iniciar gravação, para streaming (um ou outro)
+            if (cameraStates[cameraName].recording && cameraStates[cameraName].streaming) {
+                cameraStates[cameraName].streaming = false;
+            }
+            updateCameraStatus(cameraName);
+            console.log(`Câmera ${cameraName} - Gravando: ${cameraStates[cameraName].recording}`);
+            // Aqui, em um sistema real, você enviaria o comando para iniciar/parar a gravação.
+        }
+
+        // Inicializa o status das câmeras ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const cam in cameraStates) {
+                updateCameraStatus(cam);
+            }
+        });
+    </script>
+</body>
+</html>

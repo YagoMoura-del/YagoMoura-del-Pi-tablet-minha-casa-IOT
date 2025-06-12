@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Assistente de Voz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* ESTILOS DO TABLET FRAME E SCREEN (IDÊNTICOS ÀS IMAGENS DA HOME SCREEN) */
+        /* Se você JÁ tem um arquivo style.css que define .tablet-frame e .tablet-screen,
+           você pode REMOVER estes blocos de CSS e copiar as novas propriedades para lá. */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; /* Evita scroll indesejado do body */
+        }
+
+        .tablet-frame {
+            /* Largura e altura para imitar a proporção da imagem (aproximadamente 3:4 ou 9:16) */
+            width: 90vh; /* Usa 90% da altura da viewport para a largura */
+            max-width: 600px; /* Limite máximo para a largura do tablet */
+            height: 80vh; /* Usa 80% da altura da viewport */
+            max-height: 800px; /* Limite máximo para a altura do tablet */
+            
+            border: 15px solid #ffffff; /* Borda BRANCA, como na imagem */
+            border-radius: 25px; /* Bordas um pouco menos arredondadas para o tablet */
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2); /* Sombra mais pronunciada */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #ffffff; /* Fundo do frame também branco */
+            position: relative; /* Para posicionar o botão home/câmera se necessário */
+        }
+
+        .tablet-screen {
+            background-color: #f0f2f5; /* Fundo da tela interna (para combinar com a imagem) */
+            flex-grow: 1; /* Ocupa o espaço disponível */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
+            border-radius: 12px; /* Raio menor para a tela interna, ligeiramente diferente da borda externa */
+            border: 1px solid #e0e0e0; /* Pequena borda para a tela interna, como na imagem */
+        }
+
+        /* ESTILOS DO CABEÇALHO DO TABLET (IDÊNTICOS ÀS IMAGENS DA HOME SCREEN) */
+        .tablet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px; /* Ajustado para ser mais compacto como na imagem */
+            background-color: #ffffff; /* Fundo branco como na imagem */
+            border-bottom: 1px solid #eee;
+            color: #333; /* Cor do texto no cabeçalho */
+            font-size: 0.95em; /* Tamanho da fonte do cabeçalho */
+        }
+
+        .header-left #current-time {
+            font-weight: bold;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Espaçamento entre o ícone e o texto "Smart Home" */
+            font-weight: bold;
+            font-size: 1.1em; /* Tamanho maior para o título central */
+        }
+
+        .header-center i {
+            color: #007bff; /* Azul para o ícone de casa, se quiser */
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px; /* Espaçamento entre os ícones de WiFi e bateria */
+        }
+        .header-right i {
+            font-size: 1em;
+            color: #666;
+        }
+
+        /* ESTILOS DO CONTEÚDO PRINCIPAL (Assistente de Voz) */
+        .tablet-main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Centraliza o conteúdo verticalmente */
+            text-align: center;
+        }
+
+        /* Área do Assistente */
+        .assistant-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
+        .microphone-button {
+            background-color: #6200EE; /* Roxo */
+            color: white;
+            border: none;
+            border-radius: 50%; 
+            width: 100px;
+            height: 100px;
+            font-size: 3.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .microphone-button:hover {
+            background-color: #3700B3; 
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .microphone-button.recording {
+            background-color: #dc3545; /* Vermelho quando gravando */
+            animation: pulse-mic 1s infinite alternate; 
+        }
+
+        @keyframes pulse-mic {
+            from { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+            to { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(220, 53, 69, 0.3); }
+        }
+
+        p#status-message {
+            font-size: 1.1em;
+            color: #555;
+            min-height: 25px; 
+        }
+
+        p#recognized-text {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #007bff; /* Azul para o texto reconhecido */
+            min-height: 30px; 
+        }
+
+        /* Rodapé do conteúdo do assistente (não o tablet-frame) */
+        .assistant-footer { 
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #888;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Responsividade (adaptada para o contexto do tablet) */
+        @media (max-width: 768px) {
+            .tablet-frame {
+                width: 95vw; /* Ocupa mais largura em telas menores */
+                height: 85vh; /* Ocupa mais altura em telas menores */
+                border-width: 10px;
+                border-radius: 20px;
+            }
+            .tablet-screen {
+                border-radius: 10px;
+            }
+            .tablet-header {
+                padding: 8px 10px;
+            }
+            .header-center {
+                font-size: 1em;
+            }
+            .header-right i {
+                font-size: 0.9em;
+            }
+            .tablet-main-content {
+                padding: 15px;
+            }
+            .assistant-container {
+                padding: 20px;
+            }
+            .microphone-button {
+                width: 80px;
+                height: 80px;
+                font-size: 3em;
+            }
+            p#status-message {
+                font-size: 1em;
+            }
+            p#recognized-text {
+                font-size: 1.2em;
+            }
+            .assistant-footer {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tablet-frame {
+                border-width: 8px;
+                border-radius: 15px;
+            }
+            .tablet-screen {
+                border-radius: 6px;
+            }
+            .tablet-header {
+                font-size: 0.85em;
+            }
+            .header-center {
+                font-size: 0.9em;
+            }
+            .microphone-button {
+                width: 70px;
+                height: 70px;
+                font-size: 2.5em;
+            }
+            p#status-message {
+                font-size: 0.9em;
+            }
+            p#recognized-text {
+                font-size: 1.1em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <span id="current-time"></span>
+                </div>
+                <div class="header-center">
+                    <i class="fas fa-home"></i> Smart Home
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="assistant-container">
+                    <button class="microphone-button" id="microphone-button">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <p id="status-message">Pressione o microfone para começar a falar.</p>
+                    <p id="recognized-text"></p>
+                </div>
+                <footer class="assistant-footer">
+                    <p>Este assistente utiliza a Web Speech API do seu navegador.</p>
+                    <p>A precisão do reconhecimento de voz pode variar.</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // LÓGICA PARA ATUALIZAR A HORA NO CABEÇALHO (COMO NA HOME SCREEN)
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000); // Atualiza a cada segundo
+        updateTime(); // Chama a função imediatamente para exibir a hora ao carregar
+
+        // LÓGICA DO ASSISTENTE DE VOZ (mantida como você forneceu)
+        const microphoneButton = document.getElementById('microphone-button');
+        const statusMessage = document.getElementById('status-message');
+        const recognizedText = document.getElementById('recognized-text');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; 
+            recognition.lang = 'pt-BR'; 
+
+            recognition.onstart = () => {
+                isListening = true;
+                microphoneButton.classList.add('recording');
+                statusMessage.textContent = 'Ouvindo... Fale agora.';
+                recognizedText.textContent = ''; 
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                recognizedText.textContent = `Você disse: "${transcript}"`;
+                statusMessage.textContent = 'Reconhecimento concluído.';
+            };
+
+            recognition.onerror = (event) => {
+                isListening = false;
+                microphoneButton.classList.remove('recording');
+                statusMessage.textContent = `Erro no reconhecimento: ${event.error}`;
+                console.error('Speech Recognition Error:', event.error);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                microphoneButton.classList.remove('recording');
+                statusMessage.textContent = 'Pressione o microfone para começar a falar.';
+            };
+
+            microphoneButton.addEventListener('click', () => {
+                if (isListening) {
+                    recognition.stop();
+                } else {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error('Erro ao iniciar reconhecimento de fala:', e);
+                        statusMessage.textContent = 'Não foi possível iniciar o microfone. Verifique as permissões.';
+                    }
+                }
+            });
+        } else {
+            statusMessage.textContent = 'Seu navegador não suporta a API de Reconhecimento de Fala.';
+            microphoneButton.disabled = true;
+            microphoneButton.style.opacity = 0.5;
+            console.warn('Web Speech API is not supported in this browser.');
+        }
+    </script>
+</body>
+</html>

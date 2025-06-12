@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Sensores de Presença</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Estilos Gerais para o Corpo da Página */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            display: flex; /* Para centralizar o tablet-frame */
+            justify-content: center; /* Centraliza horizontalmente o tablet-frame */
+            align-items: center; /* Centraliza verticalmente o tablet-frame */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            overflow: hidden; /* Evita scroll indesejado do body se o tablet-frame for maior */
+        }
+
+        /* Estrutura do Tablet (mantida conforme seu código original) */
+        .tablet-frame {
+            background-color: #222; /* Cor da moldura externa do tablet */
+            border-radius: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            width: 900px; /* Largura do tablet em modo paisagem */
+            height: 600px; /* Altura do tablet em modo paisagem */
+            display: flex;
+            flex-direction: column; /* Conteúdo interno empilhado verticalmente */
+            align-items: center;
+            padding: 25px; /* Padding para a borda interna parecer mais fina */
+            box-sizing: border-box;
+            position: relative;
+            border: 10px solid #333; /* Borda da tela interna, mais escura */
+            z-index: 1;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .tablet-screen {
+            background-color: #ffffff; /* Fundo branco da tela */
+            border-radius: 18px; /* Raio da borda da tela interna */
+            width: 100%;
+            height: 100%;
+            overflow-y: auto; /* Permite rolagem se o conteúdo exceder */
+            padding: 20px; /* Padding interno da tela */
+            box-sizing: border-box;
+            display: flex; /* Adicionado para organizar o header e o main */
+            flex-direction: column;
+        }
+
+        /* Cabeçalho do Tablet para esta página */
+        .tablet-header {
+            color: white;
+            padding: 0px 0px 15px 0px; /* Ajustado para espaçamento superior */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Linha divisória */
+            margin-bottom: 20px; /* Espaço entre o header e o conteúdo */
+            background-color: #7B1FA2; /* Roxo mais visível para sensores */
+            border-radius: 15px 15px 0 0; /* Bordas arredondadas no topo */
+            padding-top: 15px; /* Ajuste para o conteúdo do header */
+        }
+
+        .tablet-header .header-left,
+        .tablet-header .header-right {
+            padding: 0 15px; /* Padding lateral para botões e ícones */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tablet-header .header-center h1 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tablet-header .back-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+        }
+
+        .tablet-header .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Conteúdo Principal do Tablet */
+        .tablet-main-content {
+            flex-grow: 1; /* Ocupa o espaço restante na tela do tablet */
+            display: flex;
+            flex-direction: column;
+            padding: 0px; /* Padding já está no tablet-screen */
+            box-sizing: border-box;
+        }
+
+        .sensors-grid-container { 
+            flex-grow: 1; /* Ocupa o espaço restante dentro do main */
+            display: grid;
+            gap: 25px; /* Espaçamento entre os cards */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Layout responsivo em grid */
+            justify-content: center;
+            align-content: flex-start; /* Alinha os itens ao topo do container da grid */
+            width: 100%;
+            height: 100%;
+            padding-bottom: 20px; /* Para garantir espaço no final da rolagem */
+        }
+
+        /* Card de Sensor de Presença Individual */
+        .sensor-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between; /* Para espaçar bem o conteúdo */
+        }
+
+        .sensor-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sensor-icon {
+            font-size: 4.5em; /* Tamanho grande para o ícone */
+            margin-bottom: 20px;
+            color: #ccc; /* Cor padrão (sem presença) */
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .sensor-icon.active {
+            color: #FF5733; /* Laranja/Vermelho para presença detectada */
+            transform: scale(1.1);
+        }
+
+        .sensor-controls {
+            display: flex;
+            flex-direction: column; /* Botões empilhados para melhor uso em cards */
+            gap: 10px; /* Espaço entre os botões */
+            width: 100%; /* Ocupa a largura total do card */
+            margin-top: auto; /* Empurra os botões para a parte inferior do card */
+        }
+
+        .sensor-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            width: 100%; /* Botões preenchem o espaço */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Espaçamento entre ícone e texto do botão */
+        }
+
+        .sensor-controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .sensor-controls button:active {
+            transform: translateY(0);
+        }
+
+        .sensor-controls button.clear-button {
+            background-color: #6c757d; /* Cinza para limpar */
+        }
+        .sensor-controls button.clear-button:hover {
+            background-color: #5a6268;
+        }
+
+        .status-indicator {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background-color: #ccc;
+            color: #555;
+            min-width: 150px; /* Garante largura mínima */
+        }
+        .status-indicator.detected {
+            background-color: #dc3545; /* Vermelho forte para detectado */
+            color: white;
+            animation: pulse-danger 1s infinite alternate; /* Animação para alertar */
+        }
+        .status-indicator.clear {
+            background-color: #28a745; /* Verde para limpo */
+            color: white;
+            /* Remove animação de pulso se houver */
+            animation: none;
+        }
+
+        @keyframes pulse-danger {
+            from { opacity: 0.8; }
+            to { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* Responsividade para o contexto do tablet */
+        @media (max-width: 992px) {
+            .tablet-frame {
+                width: 800px;
+                height: 550px;
+            }
+            .sensors-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            .sensor-card {
+                padding: 15px;
+            }
+            .sensor-card h2 {
+                font-size: 1.4em;
+            }
+            .sensor-icon {
+                font-size: 4em;
+            }
+            .sensor-controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-frame {
+                width: 95%; /* Ocupa mais espaço em telas menores */
+                height: 95%;
+                padding: 15px;
+            }
+            .tablet-screen {
+                padding: 15px;
+            }
+            .sensors-grid-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas menores para melhor visualização */
+                max-width: 350px; /* Limita a largura para centralizar o card único */
+                margin: 0 auto; /* Centraliza a grid */
+            }
+            .sensor-card {
+                padding: 15px;
+            }
+            .sensor-card h2 {
+                font-size: 1.3em;
+            }
+            .sensor-icon {
+                font-size: 3.5em;
+            }
+            .status-indicator {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-frame {
+                border-radius: 20px;
+                padding: 10px;
+            }
+            .tablet-screen {
+                padding: 10px;
+            }
+            .tablet-header .header-center h1 {
+                font-size: 1.5em;
+            }
+            .tablet-header .back-button {
+                font-size: 1em;
+            }
+            .sensors-grid-container {
+                padding: 5px;
+                gap: 15px;
+            }
+            .sensor-card {
+                padding: 10px;
+            }
+            .sensor-card h2 {
+                font-size: 1.2em;
+            }
+            .sensor-icon {
+                font-size: 3em;
+            }
+            .status-indicator {
+                font-size: 0.9em;
+                padding: 6px 12px;
+            }
+            .sensor-controls button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header sensors-header"> 
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-walking"></i> Sensores de Presença</h1>
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="sensors-grid-container"> 
+                    <div class="sensor-card" id="sensor-corredor">
+                        <h2><i class="fas fa-shoe-prints"></i> Sensor do Corredor</h2>
+                        <i class="fas fa-walking sensor-icon" id="icon-corredor"></i>
+                        <div class="sensor-controls">
+                            <button onclick="simulatePresence('corredor', true)"><i class="fas fa-search"></i> Detectar Presença</button>
+                            <button class="clear-button" onclick="simulatePresence('corredor', false)"><i class="fas fa-eraser"></i> Limpar Presença</button>
+                        </div>
+                        <div class="status-indicator" id="status-corredor">Livre</div>
+                    </div>
+
+                    <div class="sensor-card" id="sensor-sala">
+                        <h2><i class="fas fa-couch"></i> Sensor da Sala</h2>
+                        <i class="fas fa-walking sensor-icon" id="icon-sala"></i>
+                        <div class="sensor-controls">
+                            <button onclick="simulatePresence('sala', true)"><i class="fas fa-search"></i> Detectar Presença</button>
+                            <button class="clear-button" onclick="simulatePresence('sala', false)"><i class="fas fa-eraser"></i> Limpar Presença</button>
+                        </div>
+                        <div class="status-indicator" id="status-sala">Livre</div>
+                    </div>
+                    
+                    <div class="sensor-card" id="sensor-quarto">
+                        <h2><i class="fas fa-bed"></i> Sensor do Quarto</h2>
+                        <i class="fas fa-walking sensor-icon" id="icon-quarto"></i>
+                        <div class="sensor-controls">
+                            <button onclick="simulatePresence('quarto', true)"><i class="fas fa-search"></i> Detectar Presença</button>
+                            <button class="clear-button" onclick="simulatePresence('quarto', false)"><i class="fas fa-eraser"></i> Limpar Presença</button>
+                        </div>
+                        <div class="status-indicator" id="status-quarto">Livre</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para simular o estado dos sensores
+        const sensorStates = {
+            'corredor': { detected: false },
+            'sala': { detected: false },
+            'quarto': { detected: false } // Adicionei o novo sensor aqui
+        };
+
+        // Função para atualizar o status visual do sensor
+        function updateSensorStatus(sensorName) {
+            const iconElement = document.getElementById(`icon-${sensorName}`);
+            const statusElement = document.getElementById(`status-${sensorName}`);
+            const state = sensorStates[sensorName];
+
+            // Remove classes de estado anteriores
+            iconElement.classList.remove('active');
+            statusElement.classList.remove('detected', 'clear');
+
+            if (state.detected) {
+                iconElement.classList.add('active');
+                statusElement.textContent = 'PRESENÇA DETECTADA!';
+                statusElement.classList.add('detected');
+                statusElement.style.animation = 'pulse-danger 1s infinite alternate'; /* Garante que a animação seja ativada */
+            } else {
+                iconElement.classList.remove('active'); /* Garante que o ícone retorne à cor padrão */
+                statusElement.textContent = 'Livre';
+                statusElement.classList.add('clear');
+                statusElement.style.animation = 'none'; /* Remove a animação */
+            }
+            console.log(`Sensor ${sensorName}: ${state.detected ? 'Presença Detectada' : 'Livre'}`);
+        }
+
+        // Função para simular detecção ou limpeza de presença
+        function simulatePresence(sensorName, detected) {
+            // Verifica se o sensor existe no objeto sensorStates
+            if (sensorStates.hasOwnProperty(sensorName)) {
+                sensorStates[sensorName].detected = detected;
+                updateSensorStatus(sensorName);
+            } else {
+                console.error(`Sensor '${sensorName}' não encontrado.`);
+            }
+        }
+
+        // Inicializa o status dos sensores ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const sensor in sensorStates) {
+                updateSensorStatus(sensor);
+            }
+        });
+    </script>
+</body>
+</html>

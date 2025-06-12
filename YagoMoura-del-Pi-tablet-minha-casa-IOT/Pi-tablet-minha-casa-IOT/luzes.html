@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Controle de Lâmpadas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="./css/style.css"> 
+    
+    <style>
+        /* Estilos específicos para esta página de controle de lâmpadas */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Cor do header para esta página (azul, como na imagem de lâmpadas) */
+        .tablet-header.lights-header {
+            background-color: #3f51b5; /* Azul para lâmpadas */
+        }
+
+        /* Estilo do contador no cabeçalho */
+        .tablet-header .lights-count-display {
+            background-color: rgba(255, 255, 255, 0.2); /* Cor mais clara para contraste com o header do tablet */
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white; /* Cor do texto branca para contraste */
+        }
+        .tablet-header .lights-count-display i {
+            color: #FFD700; /* Cor dourada para o ícone no contador */
+        }
+
+        /* Conteúdo Principal da tela do tablet */
+        .tablet-main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* Organiza o painel de status e a grid verticalmente */
+            align-items: center; /* Centraliza o conteúdo */
+            gap: 20px; /* Espaçamento entre o painel e a grid */
+            overflow-y: auto; /* Permite rolagem se houver muitos cartões */
+        }
+
+        /* Painel de Status das Lâmpadas (novidade) */
+        .lights-status-panel {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+            width: 100%;
+            max-width: 900px; /* Adapte a largura para o painel */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+            gap: 15px; /* Espaçamento entre os itens de status */
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.1em;
+            color: #555;
+            min-width: 150px; /* Garante que os itens não fiquem muito apertados */
+        }
+
+        .status-item .count {
+            font-size: 2em; /* Tamanho maior para os números */
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .status-item.light-on .count {
+            color: #28a745; /* Verde para ligadas */
+        }
+
+        .status-item.light-off .count {
+            color: #dc3545; /* Vermelho para desligadas */
+        }
+
+        /* Grid de Lâmpadas */
+        .lights-grid-container { 
+            display: grid;
+            gap: 25px; /* Espaçamento entre os cards */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Layout responsivo em grid */
+            justify-content: center;
+            width: 100%;
+            max-width: 960px; /* Largura máxima da grid, similar ao de temperatura */
+        }
+
+        /* Card de Lâmpada Individual */
+        .light-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative; /* Necessário para posicionar o status-indicator */
+        }
+
+        .light-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .light-icon {
+            font-size: 4.5em;
+            margin-bottom: 20px;
+            color: #ccc; /* Cor padrão (apagada) */
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .light-icon.on {
+            color: #FFD700; /* Amarelo dourado quando ligada */
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .light-controls {
+            display: flex; /* Para os botões ficarem lado a lado */
+            gap: 10px; /* Espaço entre os botões */
+            margin-top: 15px;
+        }
+
+        .light-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-width: 120px; /* Garante que os botões tenham um tamanho mínimo */
+            display: flex; /* Para alinhar ícone e texto */
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .light-controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .light-controls button:active {
+            transform: translateY(0);
+        }
+
+        .light-controls button.off-button {
+            background-color: #dc3545; /* Cor vermelha para o botão "Desligar" */
+        }
+        .light-controls button.off-button:hover {
+            background-color: #c82333;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #ccc; /* Cinza padrão para desligada */
+            color: #555;
+            font-weight: bold;
+        }
+        .status-indicator.on {
+            background-color: #28a745; /* Verde quando ligada */
+            color: white;
+        }
+        .status-indicator.off {
+            background-color: #dc3545; /* Vermelho quando desligada */
+            color: white;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .lights-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            .light-card {
+                padding: 15px;
+            }
+            .light-card h2 {
+                font-size: 1.4em;
+            }
+            .light-icon {
+                font-size: 4em;
+            }
+            .light-controls button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+                min-width: 100px;
+            }
+            .lights-status-panel {
+                padding: 10px 15px;
+            }
+            .status-item .count {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-header .lights-count-display {
+                font-size: 1em;
+                padding: 6px 12px;
+                gap: 5px;
+            }
+            .lights-grid-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas menores */
+                gap: 15px;
+            }
+            .light-card {
+                padding: 15px;
+            }
+            .light-card h2 {
+                font-size: 1.3em;
+            }
+            .light-icon {
+                font-size: 3.5em;
+            }
+            .lights-status-panel {
+                flex-direction: column; /* Empilha os itens de status em telas pequenas */
+                gap: 10px;
+            }
+            .status-item {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-main-content {
+                padding: 10px;
+            }
+            .light-card {
+                padding: 10px;
+            }
+            .light-card h2 {
+                font-size: 1.2em;
+            }
+            .light-icon {
+                font-size: 3em;
+            }
+            .status-indicator {
+                top: 10px;
+                right: 10px;
+                font-size: 0.8em;
+                padding: 3px 8px;
+            }
+            .light-controls {
+                flex-direction: column; /* Empilha os botões em telas muito pequenas */
+                gap: 10px;
+            }
+            .light-controls button {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header lights-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-lightbulb"></i> Lâmpadas</h1>
+                </div>
+                <div class="header-right">
+                    <div class="lights-count-display" style="display: none;"> <i class="fas fa-lightbulb"></i> Ligadas: <span id="header-lights-on-count">0</span>
+                    </div>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="lights-status-panel">
+                    <div class="status-item light-on">
+                        Lâmpadas Ligadas: <span class="count" id="lights-on-count">0</span>
+                    </div>
+                    <div class="status-item light-off">
+                        Lâmpadas Desligadas: <span class="count" id="lights-off-count">0</span>
+                    </div>
+                </div>
+
+                <div class="lights-grid-container">
+                    <div class="light-card" id="light-sala">
+                        <span class="status-indicator" id="status-sala">Desligada</span>
+                        <h2><i class="fas fa-couch"></i> Lâmpada da Sala</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-sala"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('sala', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('sala', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-cozinha">
+                        <span class="status-indicator" id="status-cozinha">Desligada</span>
+                        <h2><i class="fas fa-utensils"></i> Lâmpada da Cozinha</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-cozinha"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('cozinha', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('cozinha', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-quarto1">
+                        <span class="status-indicator" id="status-quarto1">Desligada</span>
+                        <h2><i class="fas fa-bed"></i> Lâmpada Quarto 1</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-quarto1"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('quarto1', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('quarto1', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-quarto2">
+                        <span class="status-indicator" id="status-quarto2">Desligada</span>
+                        <h2><i class="fas fa-bed"></i> Lâmpada Quarto 2</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-quarto2"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('quarto2', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('quarto2', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-quarto3">
+                        <span class="status-indicator" id="status-quarto3">Desligada</span>
+                        <h2><i class="fas fa-bed"></i> Lâmpada Quarto 3</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-quarto3"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('quarto3', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('quarto3', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-churrasqueira">
+                        <span class="status-indicator" id="status-churrasqueira">Desligada</span>
+                        <h2><i class="fas fa-fire"></i> Lâmpada Churrasqueira</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-churrasqueira"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('churrasqueira', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('churrasqueira', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-area-servico">
+                        <span class="status-indicator" id="status-area-servico">Desligada</span>
+                        <h2><i class="fas fa-washer"></i> Lâmpada Área de Serviço</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-area-servico"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('area-servico', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('area-servico', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-despensa">
+                        <span class="status-indicator" id="status-despensa">Desligada</span>
+                        <h2><i class="fas fa-boxes"></i> Lâmpada Despensa</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-despensa"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('despensa', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('despensa', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-deposito">
+                        <span class="status-indicator" id="status-deposito">Desligada</span>
+                        <h2><i class="fas fa-warehouse"></i> Lâmpada Depósito</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-deposito"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('deposito', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('deposito', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-sala-estar">
+                        <span class="status-indicator" id="status-sala-estar">Desligada</span>
+                        <h2><i class="fas fa-chair"></i> Lâmpada Sala de Estar</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-sala-estar"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('sala-estar', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('sala-estar', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-sala-tv">
+                        <span class="status-indicator" id="status-sala-tv">Desligada</span>
+                        <h2><i class="fas fa-tv"></i> Lâmpada Sala de TV</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-sala-tv"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('sala-tv', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('sala-tv', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-corredor">
+                        <span class="status-indicator" id="status-corredor">Desligada</span>
+                        <h2><i class="fas fa-road"></i> Lâmpada Corredor</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-corredor"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('corredor', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('corredor', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-academia">
+                        <span class="status-indicator" id="status-academia">Desligada</span>
+                        <h2><i class="fas fa-dumbbell"></i> Lâmpada Academia</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-academia"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('academia', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('academia', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-escritorio">
+                        <span class="status-indicator" id="status-escritorio">Desligada</span>
+                        <h2><i class="fas fa-laptop-code"></i> Lâmpada Escritório</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-escritorio"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('escritorio', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('escritorio', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-sala-musica">
+                        <span class="status-indicator" id="status-sala-musica">Desligada</span>
+                        <h2><i class="fas fa-music"></i> Lâmpada Sala de Música</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-sala-musica"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('sala-musica', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('sala-musica', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-biblioteca">
+                        <span class="status-indicator" id="status-biblioteca">Desligada</span>
+                        <h2><i class="fas fa-book-reader"></i> Lâmpada Biblioteca</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-biblioteca"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('biblioteca', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('biblioteca', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-dormitorio1">
+                        <span class="status-indicator" id="status-dormitorio1">Desligada</span>
+                        <h2><i class="fas fa-bunk-bed"></i> Lâmpada Dormitório 1</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-dormitorio1"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('dormitorio1', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('dormitorio1', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-dormitorio2">
+                        <span class="status-indicator" id="status-dormitorio2">Desligada</span>
+                        <h2><i class="fas fa-bunk-bed"></i> Lâmpada Dormitório 2</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-dormitorio2"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('dormitorio2', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('dormitorio2', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-banheiro1">
+                        <span class="status-indicator" id="status-banheiro1">Desligada</span>
+                        <h2><i class="fas fa-toilet"></i> Lâmpada Banheiro 1</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-banheiro1"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('banheiro1', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('banheiro1', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-banheiro2">
+                        <span class="status-indicator" id="status-banheiro2">Desligada</span>
+                        <h2><i class="fas fa-toilet"></i> Lâmpada Banheiro 2</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-banheiro2"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('banheiro2', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('banheiro2', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-closet1">
+                        <span class="status-indicator" id="status-closet1">Desligada</span>
+                        <h2><i class="fas fa-door-open"></i> Lâmpada Closet 1</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-closet1"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('closet1', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('closet1', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                    <div class="light-card" id="light-closet2">
+                        <span class="status-indicator" id="status-closet2">Desligada</span>
+                        <h2><i class="fas fa-door-open"></i> Lâmpada Closet 2</h2>
+                        <i class="fas fa-lightbulb light-icon" id="icon-closet2"></i>
+                        <div class="light-controls">
+                            <button onclick="toggleLight('closet2', true)"><i class="fas fa-power-on"></i> Ligar</button>
+                            <button class="off-button" onclick="toggleLight('closet2', false)"><i class="fas fa-power-off"></i> Desligar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para armazenar o estado das lâmpadas (true = ligada, false = desligada)
+        const lightStates = {
+            'sala': false,
+            'cozinha': false,
+            'quarto1': false,
+            'quarto2': false,
+            'quarto3': false,
+            'churrasqueira': false,
+            'area-servico': false,
+            'despensa': false,
+            'deposito': false,
+            'sala-estar': false,
+            'sala-tv': false,
+            'corredor': false,
+            'academia': false,
+            'escritorio': false,
+            'sala-musica': false,
+            'biblioteca': false,
+            'dormitorio1': false,
+            'dormitorio2': false,
+            'banheiro1': false,
+            'banheiro2': false,
+            'closet1': false,
+            'closet2': false
+        };
+
+        // Função para atualizar as contagens de lâmpadas ligadas e desligadas no painel
+        function updateLightCounts() {
+            let lightsOn = 0;
+            let lightsOff = 0;
+
+            for (const light in lightStates) {
+                if (lightStates[light]) { // Se a lâmpada está ligada (true)
+                    lightsOn++;
+                } else { // Se a lâmpada está desligada (false)
+                    lightsOff++;
+                }
+            }
+
+            // Atualiza os elementos HTML com as novas contagens
+            document.getElementById('lights-on-count').textContent = lightsOn;
+            document.getElementById('lights-off-count').textContent = lightsOff;
+            
+            // Opcional: Se você ainda quiser o contador no cabeçalho
+            document.getElementById('header-lights-on-count').textContent = lightsOn;
+        }
+
+        // Função para atualizar o status visual de uma lâmpada individual
+        function updateLightDisplay(lightName) {
+            const iconElement = document.getElementById(`icon-${lightName}`);
+            const statusElement = document.getElementById(`status-${lightName}`);
+            const isOn = lightStates[lightName];
+
+            if (isOn) {
+                iconElement.classList.add('on');
+                statusElement.textContent = 'Ligada';
+                statusElement.classList.remove('off');
+                statusElement.classList.add('on');
+            } else {
+                iconElement.classList.remove('on');
+                statusElement.textContent = 'Desligada';
+                statusElement.classList.remove('on');
+                statusElement.classList.add('off');
+            }
+        }
+
+        // Função para Ligar/Desligar a Lâmpada e atualizar tudo
+        function toggleLight(lightName, turnOn) {
+            lightStates[lightName] = turnOn; // Atualiza o estado no objeto
+            updateLightDisplay(lightName);   // Atualiza o visual do cartão
+            updateLightCounts();             // Atualiza as contagens no painel
+
+            console.log(`Lâmpada ${lightName} está: ${lightStates[lightName] ? 'Ligada' : 'Desligada'}`);
+            // Em um sistema real, aqui você enviaria o comando para o hardware da lâmpada.
+        }
+
+        // Inicializa o status de todas as lâmpadas e as contagens ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const lightName in lightStates) {
+                updateLightDisplay(lightName); // Define o estado visual inicial de cada lâmpada
+            }
+            updateLightCounts(); // Garante que as contagens estejam corretas no carregamento inicial
+        });
+    </script>
+</body>
+</html>

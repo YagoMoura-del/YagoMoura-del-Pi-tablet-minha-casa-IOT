@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home Tablet - Controle da TV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/tv.css">
+</head>
+<body>
+
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header">
+                <div class="header-left">
+                    <span id="current-time"></span>
+                </div>
+                <div class="header-center">
+                    <i class="fas fa-home"></i> Smart Home
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <div class="tv-control-content">
+                <header class="tv-header">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                    <h1><i class="fas fa-tv"></i> Controle da Smart TV</h1>
+                    <div></div> </header>
+
+                <main class="tv-main-content">
+                    <div class="tv-control-card">
+                        <i class="fas fa-tv icon-large"></i>
+                        <h2>Minha Smart TV</h2>
+                        <div class="tv-status" id="tvStatus">Desligada</div>
+
+                        <div class="power-button-container">
+                            <button class="power-button" id="powerButton" onclick="togglePower()">
+                                <i class="fas fa-power-off"></i> Ligar TV
+                            </button>
+                        </div>
+
+                        <div class="volume-section">
+                            <label for="volumeRange">Volume: <span id="volumeValue">50</span></label>
+                            <div class="volume-slider-container">
+                                <i class="fas fa-volume-down"></i>
+                                <input type="range" id="volumeRange" min="0" max="100" value="50" oninput="updateVolume(this.value)" disabled>
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                        </div>
+
+                        <div class="channel-section">
+                            <label>Canal Atual: <span id="currentChannel">1</span></label>
+                            <div class="channel-control-buttons">
+                                <button onclick="changeChannel(-1)" id="channelDownButton" disabled><i class="fas fa-caret-down"></i> Canal -</button>
+                                <button onclick="changeChannel(1)" id="channelUpButton" disabled><i class="fas fa-caret-up"></i> Canal +</button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis de estado da TV
+        let tvOn = false;
+        let currentVolume = 50;
+        let currentChannel = 1;
+
+        // Referências aos elementos HTML
+        const tvStatus = document.getElementById('tvStatus');
+        const powerButton = document.getElementById('powerButton');
+        const volumeRange = document.getElementById('volumeRange');
+        const volumeValue = document.getElementById('volumeValue');
+        const currentChannelDisplay = document.getElementById('currentChannel');
+        const channelUpButton = document.getElementById('channelUpButton');
+        const channelDownButton = document.getElementById('channelDownButton');
+
+        // Função para atualizar a interface do usuário da TV
+        function updateUI() {
+            if (tvOn) {
+                tvStatus.textContent = 'Ligada';
+                tvStatus.classList.remove('off');
+                tvStatus.classList.add('on');
+                powerButton.textContent = 'Desligar TV';
+                powerButton.classList.add('on');
+                powerButton.style.backgroundColor = '#28a745'; // Verde para ligar
+
+                volumeRange.disabled = false;
+                channelUpButton.disabled = false;
+                channelDownButton.disabled = false;
+            } else {
+                tvStatus.textContent = 'Desligada';
+                tvStatus.classList.remove('on');
+                tvStatus.classList.add('off');
+                powerButton.textContent = 'Ligar TV';
+                powerButton.classList.remove('on');
+                powerButton.style.backgroundColor = '#dc3545'; // Vermelho para desligar
+
+                volumeRange.disabled = true;
+                channelUpButton.disabled = true;
+                channelDownButton.disabled = true;
+            }
+            volumeValue.textContent = currentVolume;
+            currentChannelDisplay.textContent = currentChannel;
+        }
+
+        // Função para ligar/desligar a TV
+        function togglePower() {
+            tvOn = !tvOn;
+            updateUI();
+            if (tvOn) {
+                console.log('TV Ligada!');
+            } else {
+                console.log('TV Desligada!');
+            }
+        }
+
+        // Função para ajustar o volume da TV
+        function updateVolume(volume) {
+            if (tvOn) {
+                currentVolume = parseInt(volume);
+                volumeValue.textContent = currentVolume;
+                console.log('Volume da TV definido para: ' + currentVolume);
+            } else {
+                volumeRange.value = currentVolume; // Reseta o slider se a TV estiver desligada
+                alert('A TV está desligada. Ligue-a primeiro para ajustar o volume!');
+            }
+        }
+
+        // Função para mudar o canal da TV
+        function changeChannel(direction) {
+            if (tvOn) {
+                currentChannel += direction;
+                if (currentChannel < 1) { // Garante que o canal não seja menor que 1
+                    currentChannel = 1;
+                }
+                currentChannelDisplay.textContent = currentChannel;
+                console.log('Canal da TV alterado para: ' + currentChannel);
+            } else {
+                alert('A TV está desligada. Ligue-a primeiro para trocar de canal!');
+            }
+        }
+
+        // Script para atualizar a hora no cabeçalho do tablet
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+
+        // Inicializa a UI da TV e o relógio do tablet ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI(); // Chama updateUI para garantir o estado inicial correto da TV
+            updateTime(); // Atualiza a hora uma vez na inicialização
+            setInterval(updateTime, 1000); // Atualiza a hora a cada segundo
+        });
+    </script>
+</body>
+</html>

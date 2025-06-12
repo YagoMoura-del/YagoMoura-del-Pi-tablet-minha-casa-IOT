@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Sensores de Temperatura</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="./css/style.css"> 
+    
+    <style>
+        /* Estilos específicos para esta página de temperatura */
+        body {
+            /* Remover ou ajustar estilos de body que já estão no style.css do tablet-frame */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            /* Flexbox será gerenciado pelo tablet-frame/screen */
+            display: flex; /* Mantido para que o tablet-frame centralize, se necessário */
+            justify-content: center; /* Centraliza o tablet-frame */
+            align-items: center; /* Centraliza verticalmente o tablet-frame */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            overflow: hidden; /* Evita scroll indesejado do body se o tablet-frame for maior */
+        }
+
+        /* O header original foi removido, pois o tablet-header assume seu lugar */
+        .tablet-header.temperature-header { /* Classe específica para este cabeçalho */
+            background-color: #FF4500; /* Laranja avermelhado para temperatura */
+        }
+
+        /* Conteúdo Principal */
+        .tablet-main-content .temperature-grid-container { /* Novo contêiner para a grid de sensores */
+            flex-grow: 1; /* Ocupa o espaço restante */
+            padding: 20px;
+            display: grid;
+            gap: 25px; /* Espaçamento entre os cards */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Layout responsivo em grid */
+            justify-content: center;
+            align-items: flex-start; /* Alinha os itens ao topo */
+            width: 100%; /* Ocupa a largura total */
+            max-width: 960px; /* Aumentado para acomodar mais cartões sem quebrar tanto */
+        }
+
+        /* Card de Sensor de Temperatura Individual */
+        .temperature-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .temperature-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .temperature-icon {
+            font-size: 4.5em; /* Tamanho grande para o ícone */
+            margin-bottom: 20px;
+            color: #FF4500; /* Laranja avermelhado */
+        }
+
+        .temperature-value, .humidity-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #007bff; /* Azul para valores */
+            margin-bottom: 10px;
+        }
+
+        .humidity-value {
+            font-size: 1.6em;
+            color: #28a745; /* Verde para umidade */
+        }
+
+        .last-update {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Botão de Atualização (Simulação) */
+        .refresh-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .refresh-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .refresh-button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsividade para o contexto do tablet */
+        @media (max-width: 1200px) { /* Adicionado breakpoint para 3 colunas em telas maiores */
+            .tablet-main-content .temperature-grid-container {
+                grid-template-columns: repeat(3, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .tablet-main-content .temperature-grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                padding: 15px;
+            }
+            .temperature-card {
+                padding: 15px;
+            }
+            .temperature-card h2 {
+                font-size: 1.4em;
+            }
+            .temperature-icon {
+                font-size: 4em;
+            }
+            .temperature-value {
+                font-size: 2em;
+            }
+            .humidity-value {
+                font-size: 1.5em;
+            }
+            .refresh-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-main-content .temperature-grid-container {
+                grid-template-columns: 1fr; /* Uma coluna em telas menores para melhor visualização */
+                max-width: 350px; /* Limita a largura para centralizar o card único */
+            }
+            .temperature-card {
+                padding: 15px;
+            }
+            .temperature-card h2 {
+                font-size: 1.3em;
+            }
+            .temperature-icon {
+                font-size: 3.5em;
+            }
+            .temperature-value {
+                font-size: 1.8em;
+            }
+            .humidity-value {
+                font-size: 1.4em;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-main-content .temperature-grid-container {
+                padding: 10px;
+            }
+            .temperature-card {
+                padding: 10px;
+            }
+            .temperature-card h2 {
+                font-size: 1.2em;
+            }
+            .temperature-icon {
+                font-size: 3em;
+            }
+            .temperature-value {
+                font-size: 1.6em;
+            }
+            .humidity-value {
+                font-size: 1.3em;
+            }
+            .refresh-button {
+                font-size: 0.8em;
+                padding: 7px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header temperature-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-thermometer-half"></i> Temperatura</h1>
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="temperature-grid-container">
+                    <div class="temperature-card" id="sensor-sala">
+                        <h2><i class="fas fa-couch"></i> Sala</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-sala">22.5</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-sala">60</span>%</div> 
+                        <div class="last-update" id="update-sala">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('sala')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-quarto1">
+                        <h2><i class="fas fa-bed"></i> Quarto 1</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-quarto1">20.1</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-quarto1">55</span>%</div> 
+                        <div class="last-update" id="update-quarto1">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('quarto1')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-quarto2">
+                        <h2><i class="fas fa-bed"></i> Quarto 2</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-quarto2">21.0</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-quarto2">58</span>%</div> 
+                        <div class="last-update" id="update-quarto2">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('quarto2')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-quarto3">
+                        <h2><i class="fas fa-bed"></i> Quarto 3</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-quarto3">21.5</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-quarto3">56</span>%</div> 
+                        <div class="last-update" id="update-quarto3">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('quarto3')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-dormitorio1">
+                        <h2><i class="fas fa-bunk-bed"></i> Dormitório 1</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-dormitorio1">23.5</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-dormitorio1">62</span>%</div> 
+                        <div class="last-update" id="update-dormitorio1">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('dormitorio1')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-dormitorio2">
+                        <h2><i class="fas fa-bunk-bed"></i> Dormitório 2</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-dormitorio2">22.8</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-dormitorio2">59</span>%</div> 
+                        <div class="last-update" id="update-dormitorio2">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('dormitorio2')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <div class="temperature-card" id="sensor-suite">
+                        <h2><i class="fas fa-king"></i> Suíte</h2>
+                        <i class="fas fa-thermometer-half temperature-icon"></i>
+                        <div class="temperature-value"><span id="temp-suite">20.8</span> °C</div> 
+                        <div class="humidity-value"><i class="fas fa-water"></i> <span id="hum-suite">57</span>%</div> 
+                        <div class="last-update" id="update-suite">Última atualização: --:--:--</div>
+                        <button class="refresh-button" onclick="updateSensorData('suite')"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para simular os dados dos sensores
+        const sensorData = {
+            'sala': { temperature: 22.5, humidity: 60 },
+            'quarto1': { temperature: 20.1, humidity: 55 },
+            'quarto2': { temperature: 21.0, humidity: 58 },
+            'quarto3': { temperature: 21.5, humidity: 56 }, // Adicionado o Quarto 3
+            'dormitorio1': { temperature: 23.5, humidity: 62 },
+            'dormitorio2': { temperature: 22.8, humidity: 59 },
+            'suite': { temperature: 20.8, humidity: 57 }
+        };
+
+        // Função para gerar um número aleatório dentro de um intervalo
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // Função para atualizar os dados de um sensor específico
+        function updateSensorData(sensorName) {
+            // Simula uma nova leitura
+            sensorData[sensorName].temperature = getRandomArbitrary(18.0, 28.0).toFixed(1);
+            sensorData[sensorName].humidity = Math.floor(getRandomArbitrary(40, 80));
+
+            // Atualiza os elementos HTML
+            document.getElementById(`temp-${sensorName}`).textContent = sensorData[sensorName].temperature;
+            document.getElementById(`hum-${sensorName}`).textContent = sensorData[sensorName].humidity;
+            
+            const now = new Date();
+            document.getElementById(`update-${sensorName}`).textContent = `Última atualização: ${now.toLocaleTimeString()}`;
+
+            console.log(`Dados do sensor ${sensorName} atualizados: Temp=${sensorData[sensorName].temperature}°C, Hum=${sensorData[sensorName].humidity}%`);
+            // Em um sistema real, aqui você faria uma requisição AJAX para buscar os dados reais do sensor.
+        }
+
+        // Inicializa os dados e a exibição ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            // No entanto, para a "Última atualização" inicial, precisamos preencher:
+            for (const sensor in sensorData) {
+                const now = new Date();
+                document.getElementById(`update-${sensor}`).textContent = `Última atualização: ${now.toLocaleTimeString()}`;
+            }
+        });
+    </script>
+</body>
+</html>

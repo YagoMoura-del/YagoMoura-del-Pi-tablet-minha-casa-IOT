@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Home - Segurança</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="./css/style.css"> 
+    
+    <style>
+        /* Estilos específicos para esta página de segurança */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Fundo cinza claro */
+            color: #333;
+            display: flex; /* Garante que o body use flexbox */
+            justify-content: center; /* Centraliza horizontalmente o tablet-frame */
+            align-items: center; /* Centraliza verticalmente o tablet-frame */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+            overflow: hidden; /* Evita scroll indesejado do body se o tablet-frame for maior */
+        }
+
+        /* O header original foi removido, pois o tablet-header assume seu lugar */
+        .tablet-header.security-header { /* Classe específica para este cabeçalho */
+            background-color: #A00000; /* Vermelho escuro para segurança */
+        }
+
+        /* Conteúdo Principal */
+        .tablet-main-content { /* Adicione display flex e centralização aqui */
+            display: flex;
+            flex-direction: column; /* Para empilhar o conteúdo se houver mais de um item */
+            align-items: center; /* Centraliza itens horizontalmente dentro do main */
+            justify-content: center; /* Centraliza itens verticalmente dentro do main */
+            flex-grow: 1; /* Permite que o main ocupe o espaço disponível */
+            padding: 20px; /* Mantém o padding */
+        }
+
+        .tablet-main-content .security-content-wrapper { /* Novo contêiner para o card de segurança */
+            /* flex-grow: 1; */ /* Remova ou ajuste, pois o tablet-main-content já gerencia o espaço */
+            padding: 0; /* Remova o padding duplicado aqui */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Centraliza verticalmente o card */
+            text-align: center;
+            width: 100%; /* Ocupa a largura total do tablet-main-content */
+            height: 100%; /* Garante que o wrapper ocupe a altura total para centralizar */
+        }
+
+        /* Card de Segurança Principal */
+        .security-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* justify-content: center; */ /* Remova para que o padding e margin funcionem bem */
+        }
+
+        .security-card h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .security-icon {
+            font-size: 6em; /* Ícone grande */
+            margin-bottom: 30px;
+            color: #ccc; /* Padrão (desativado) */
+            transition: color 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Classe específica para o ícone de alarme */
+        .security-icon.fa-bell {
+            color: #ff0000; /* Vermelho vibrante para alarme ativo */
+            animation: pulsate-alarm 1s infinite alternate; /* Animação de alarme */
+            /* Remove transform: scale(1.1) daqui para evitar conflito com a animação */
+        }
+
+        /* Mantém o estilo armed se for um ícone diferente ou se a animação não estiver ativa */
+        .security-icon.armed {
+            color: #dc3545; /* Vermelho para armado (sem alarme) */
+            transform: scale(1.1); /* Mantém o zoom para armado */
+        }
+
+        @keyframes pulsate-alarm {
+            from { opacity: 0.8; transform: scale(1.1); }
+            to { opacity: 1; transform: scale(1.15); filter: brightness(1.2); }
+        }
+
+        .status-display {
+            font-size: 2em;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            color: white;
+            background-color: #6c757d; /* Cinza padrão */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .status-display.armed {
+            background-color: #ffc107; /* Amarelo para armado */
+            color: #333;
+        }
+
+        .status-display.active {
+            background-color: #dc3545; /* Vermelho para alarme */
+            animation: pulse-status 1s infinite alternate;
+        }
+
+        .status-display.disarmed {
+            background-color: #28a745; /* Verde para desarmado */
+        }
+
+        @keyframes pulse-status {
+            from { opacity: 0.9; }
+            to { opacity: 1; transform: scale(1.02); }
+        }
+
+        .security-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .security-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-width: 150px;
+        }
+
+        .security-controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .security-controls button:active {
+            transform: translateY(0);
+        }
+
+        .security-controls button.arm-button {
+            background-color: #ffc107; /* Amarelo para armar */
+            color: #333;
+        }
+        .security-controls button.arm-button:hover {
+            background-color: #e0a800;
+        }
+
+        .security-controls button.disarm-button {
+            background-color: #28a745; /* Verde para desarmar */
+        }
+        .security-controls button.disarm-button:hover {
+            background-color: #218838;
+        }
+
+        .security-controls button.alarm-button {
+            background-color: #dc3545; /* Vermelho para alarme */
+        }
+        .security-controls button.alarm-button:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsividade para o contexto do tablet */
+        @media (max-width: 992px) {
+            .tablet-main-content .security-content-wrapper {
+                padding: 15px;
+            }
+            .security-card {
+                padding: 25px;
+            }
+            .security-card h2 {
+                font-size: 1.8em;
+            }
+            .security-icon {
+                font-size: 5em;
+            }
+            .status-display {
+                font-size: 1.8em;
+                padding: 12px 25px;
+            }
+            .security-controls button {
+                padding: 10px 20px;
+                font-size: 1em;
+                min-width: 140px;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .security-card {
+                padding: 20px;
+                max-width: 400px;
+            }
+            .security-card h2 {
+                font-size: 1.6em;
+            }
+            .security-icon {
+                font-size: 4.5em;
+            }
+            .status-display {
+                font-size: 1.6em;
+                padding: 10px 20px;
+            }
+            .security-controls {
+                flex-direction: column; /* Botões empilhados em telas menores */
+            }
+            .security-controls button {
+                min-width: unset; /* Remove min-width quando empilhado */
+                width: 90%; /* Ocupa a largura do card */
+                max-width: 250px; /* Limita a largura para botões individuais */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tablet-main-content .security-content-wrapper {
+                padding: 10px;
+            }
+            .security-card {
+                padding: 15px;
+            }
+            .security-card h2 {
+                font-size: 1.4em;
+            }
+            .security-icon {
+                font-size: 4em;
+            }
+            .status-display {
+                font-size: 1.4em;
+                padding: 8px 15px;
+            }
+            .security-controls button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-frame">
+        <div class="tablet-screen">
+            <header class="tablet-header security-header">
+                <div class="header-left">
+                    <button class="back-button" onclick="history.back()"><i class="fas fa-arrow-left"></i> Voltar</button>
+                </div>
+                <div class="header-center">
+                    <h1><i class="fas fa-shield-alt"></i> Segurança</h1>
+                </div>
+                <div class="header-right">
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-half"></i>
+                </div>
+            </header>
+
+            <main class="tablet-main-content">
+                <div class="security-content-wrapper">
+                    <div class="security-card">
+                        <h2><i class="fas fa-home"></i> Segurança da Casa</h2>
+                        <i class="fas fa-shield-alt security-icon" id="security-icon"></i>
+                        <div class="status-display" id="security-status-display">Desativado</div>
+                        <div class="security-controls">
+                            <button class="arm-button" onclick="setSecurityStatus('armed')"><i class="fas fa-lock"></i> Armar Sistema</button>
+                            <button class="disarm-button" onclick="setSecurityStatus('disarmed')"><i class="fas fa-unlock"></i> Desarmar Sistema</button>
+                            <button class="alarm-button" onclick="setSecurityStatus('active')"><i class="fas fa-bell"></i> Ativar Alarme</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const securityIcon = document.getElementById('security-icon');
+        const statusDisplay = document.getElementById('security-status-display');
+
+        // Estado inicial do sistema de segurança: 'disarmed', 'armed', 'active'
+        let currentSecurityState = 'disarmed'; 
+
+        // Função para atualizar o status visual e o estado do sistema
+        function updateSecurityUI() {
+            // Remove todas as classes de estado e ícones de antes
+            securityIcon.classList.remove('armed', 'active', 'fa-shield-alt', 'fa-bell');
+            statusDisplay.classList.remove('armed', 'active', 'disarmed');
+
+            if (currentSecurityState === 'armed') {
+                securityIcon.classList.add('fas', 'fa-shield-alt', 'armed'); // Ícone de escudo, armado
+                statusDisplay.textContent = 'ARMADO';
+                statusDisplay.classList.add('armed');
+            } else if (currentSecurityState === 'active') {
+                securityIcon.classList.add('fas', 'fa-bell', 'active'); // Ícone de sino, ativo
+                statusDisplay.textContent = 'ALARME ATIVADO!';
+                statusDisplay.classList.add('active');
+            } else { // 'disarmed'
+                securityIcon.classList.add('fas', 'fa-shield-alt'); // Ícone de escudo, desativado
+                statusDisplay.textContent = 'Desativado';
+                statusDisplay.classList.add('disarmed');
+            }
+            console.log(`Sistema de Segurança: ${currentSecurityState}`);
+            // Em um sistema real, aqui você enviaria o comando para o hardware de segurança.
+            // Poderia também notificar seu MainController.js sobre a mudança.
+        }
+
+        // Função para definir o status do sistema de segurança
+        function setSecurityStatus(status) {
+            currentSecurityState = status;
+            updateSecurityUI();
+        }
+
+        // Inicializa o status ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSecurityUI();
+        });
+    </script>
+</body>
+</html>
